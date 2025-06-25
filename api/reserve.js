@@ -1,3 +1,9 @@
+export const config = {
+  api: {
+    bodyParser: false,
+  },
+};
+
 const fs = require("fs");
 const path = require("path");
 const FILE_PATH = path.resolve(__dirname, "../reservations.json");
@@ -8,7 +14,7 @@ module.exports = (req, res) => {
   req.on("data", (chunk) => { body += chunk; });
   req.on("end", () => {
     try {
-      // 실제 body 값 로그 출력(함수 로그에서 확인!)
+      // body 값이 실제로 잘 들어오는지 로그 찍기
       console.log("body:", body);
       if (!body) return res.status(400).send("빈 요청 본문");
       const parsed = JSON.parse(body);
