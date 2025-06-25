@@ -1,12 +1,13 @@
+const fs = require("fs");
+const path = require("path");
+const FILE_PATH = path.resolve(__dirname, "../reservations.json");
+
 module.exports = (req, res) => {
   if (req.method !== "POST") return res.status(405).send("Method Not Allowed");
   try {
+    // 여기! Vercel serverless에서는 req.body에서 바로 꺼낼 수 있음
     const { nickname } = req.body;
     if (!nickname) return res.status(400).send("닉네임 필요");
-
-    const fs = require("fs");
-    const path = require("path");
-    const FILE_PATH = path.resolve(__dirname, "../reservations.json");
 
     let list = [];
     if (fs.existsSync(FILE_PATH)) {
