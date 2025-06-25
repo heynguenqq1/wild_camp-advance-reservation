@@ -8,7 +8,8 @@ module.exports = (req, res) => {
   req.on("data", (chunk) => { body += chunk; });
   req.on("end", () => {
     try {
-      const { nickname } = JSON.parse(body);
+      const parsed = JSON.parse(body);
+      const nickname = parsed.nickname;
       if (!nickname) return res.status(400).send("닉네임 필요");
 
       let list = [];
