@@ -23,6 +23,7 @@
   <ul id="nicknameList"></ul>
 
   <script>
+    // 이미 사전예약 했는지 확인(localStorage 사용)
     const reserved = localStorage.getItem("wildcamp_reserved");
     if (reserved) {
       document.getElementById("reserveForm").innerHTML =
@@ -36,6 +37,8 @@
         alert("닉네임을 입력해주세요.");
         return;
       }
+
+      // 서버에 닉네임 보내기 (fetch)
       try {
         const response = await fetch("/api/reserve", {
           method: "POST",
@@ -50,6 +53,8 @@
           loadNicknames();
         } else if (response.status === 409) {
           alert("이미 등록된 닉네임입니다.");
+        } else if (response.status === 400) {
+          alert("닉네임이 제대로 전송되지 않았습니다.");
         } else {
           alert("오류가 발생했습니다. 다시 시도해주세요.");
         }
@@ -59,16 +64,25 @@
       }
     });
 
+    // 사전예약자 목록 불러오기
     async function loadNicknames() {
-      const res = await fetch("/api/list");
-      const list = await res.json();
-      const ul = document.getElementById("nicknameList");
-      ul.innerHTML = "";
-      list.forEach(nick => {
-        const li = document.createElement("li");
-        li.textContent = nick;
-        ul.appendChild(li);
-      });
+      try {
+        const res = await fetch("/api/list");
+        if (res.ok) {
+          const list = await res.json();
+          const ul = document.getElementById("nicknameList");
+          ul.innerHTML = "";
+          list.forEach(nick => {
+            const li = document.createElement("li");
+            li.textContent = nick;
+            ul.appendChild(li);
+          });
+        } else {
+          document.getElementById("nicknameList").innerHTML = "<li>목록을 불러올 수 없습니다.</li>";
+        }
+      } catch (e) {
+        document.getElementById("nicknameList").innerHTML = "<li>목록을 불러올 수 없습니다.</li>";
+      }
     }
     loadNicknames();
   </script>
