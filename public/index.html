@@ -1,89 +1,185 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8">
-  <title>와일드 캠프 - 사전예약</title>
+  <meta charset="UTF-8" />
+  <title>와일드 캠프 사전예약</title>
   <style>
-    body { font-family: Arial, sans-serif; text-align: center; margin-top: 50px; }
-    input, button { padding: 10px; font-size: 16px; margin: 10px; }
-    ul { list-style: none; padding: 0; }
-    #nicknameList { margin-top: 20px; }
+    body {
+      font-family: 'Noto Sans KR', sans-serif;
+      background: #f9f9fa;
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .container {
+      max-width: 440px;
+      width: 100%;
+      margin: 60px auto 0;
+      background: #fff;
+      border-radius: 16px;
+      box-shadow: 0 4px 24px 0 rgba(60,70,130,0.07);
+      padding: 36px 24px 36px 24px;
+    }
+    h1 {
+      text-align: center;
+      font-size: 2rem;
+      font-weight: bold;
+      margin-bottom: 6px;
+    }
+    .subtitle {
+      color: #444;
+      font-size: 1.08rem;
+      text-align: center;
+      margin-bottom: 24px;
+    }
+    .form-row {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 6px;
+    }
+    #nicknameInput {
+      flex: 1;
+      padding: 12px;
+      font-size: 1.05rem;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      outline: none;
+    }
+    #reserveBtn {
+      background: #7757fa;
+      color: #fff;
+      font-weight: bold;
+      border: none;
+      border-radius: 8px;
+      padding: 12px 22px;
+      font-size: 1.05rem;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    #reserveBtn:hover {
+      background: #583bd5;
+    }
+    .warning {
+      color: #e53935;
+      font-weight: bold;
+      font-size: 1rem;
+      margin-top: 7px;
+      margin-bottom: 7px;
+      display: none;
+      text-align: left;
+    }
+    .section-title {
+      margin: 38px 0 6px 0;
+      font-size: 1.18rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .list-box {
+      background: #f5f5ff;
+      border-radius: 12px;
+      padding: 14px 14px 6px 14px;
+      min-height: 40px;
+      margin-bottom: 22px;
+    }
+    .nickname-item {
+      font-size: 1.04rem;
+      margin-bottom: 6px;
+      padding-left: 4px;
+    }
+    .empty-list {
+      color: #999;
+      font-size: 1.01rem;
+      text-align: left;
+      padding-left: 4px;
+    }
   </style>
 </head>
 <body>
-  <h1>🎮 와일드 캠프 사전예약 🎮</h1>
-  <p>닉네임을 입력하고 단 한 번의 사전예약 기회를 잡으세요!</p>
-
-  <div id="reserveForm">
-    <input type="text" id="nickname" placeholder="닉네임 입력" required />
-    <button type="submit" id="reserveBtn">사전예약</button>
+  <div class="container">
+    <h1>🎮 와일드 캠프 사전예약 🎮</h1>
+    <div class="subtitle">
+      닉네임을 입력하고 <b>단 한 번</b>의 사전예약 기회를 잡으세요!
+    </div>
+    <div class="form-row">
+      <input id="nicknameInput" type="text" placeholder="카카오톡 닉네임/이름" maxlength="20" />
+      <button id="reserveBtn" onclick="onReserve()">사전예약</button>
+    </div>
+    <div id="warningMsg" class="warning">
+      카카오톡 닉네임 혹은 실제 이름을 작성해주세요
+    </div>
+    <div class="section-title">📜 사전예약자 목록</div>
+    <div class="list-box" id="listBox">
+      <div class="empty-list">목록을 불러올 수 없습니다.</div>
+    </div>
   </div>
 
-  <h2>📜 사전예약자 목록</h2>
-  <ul id="nicknameList"></ul>
-
   <script>
-    // 이미 사전예약 했는지 확인(localStorage 사용)
-    const reserved = localStorage.getItem("wildcamp_reserved");
-    if (reserved) {
-      document.getElementById("reserveForm").innerHTML =
-        "<p>✅ 이미 사전예약을 완료하셨습니다.</p>";
+    const nicknameInput = document.getElementById("nicknameInput");
+    const warningMsg = document.getElementById("warningMsg");
+    const listBox = document.getElementById("listBox");
+    let isLoading = false;
+
+    // 예약 목록 불러오기
+    async function fetchList() {
+      try {
+        listBox.innerHTML = '<div class="empty-list">불러오는 중...</div>';
+        const res = await fetch("/api/list");
+        if (!res.ok) throw new Error();
+        const list = await res.json();
+        if (!list.length) {
+          listBox.innerHTML = '<div class="empty-list">아직 사전예약자가 없습니다.</div>';
+        } else {
+          listBox.innerHTML = "";
+          list.forEach(nickname => {
+            const div = document.createElement("div");
+            div.className = "nickname-item";
+            div.textContent = nickname;
+            listBox.appendChild(div);
+          });
+        }
+      } catch (e) {
+        listBox.innerHTML = '<div class="empty-list">목록을 불러올 수 없습니다.</div>';
+      }
     }
 
-    document.getElementById("reserveBtn")?.addEventListener("click", async (e) => {
-      e.preventDefault();
-      const nickname = document.getElementById("nickname").value.trim();
+    // 예약 등록
+    async function onReserve() {
+      const nickname = nicknameInput.value.trim();
+      warningMsg.style.display = "none";
       if (!nickname) {
-        alert("닉네임을 입력해주세요.");
+        warningMsg.style.display = "block";
+        nicknameInput.focus();
         return;
       }
-
+      if (isLoading) return;
+      isLoading = true;
       try {
-        const response = await fetch("/api/reserve", {
+        const res = await fetch("/api/reserve", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ nickname })
         });
-
-        if (response.ok) {
-          localStorage.setItem("wildcamp_reserved", "true");
-          document.getElementById("reserveForm").innerHTML =
-            "<p>🎉 사전예약이 완료되었습니다!</p>";
-          loadNicknames();
-        } else if (response.status === 409) {
-          alert("이미 등록된 닉네임입니다.");
-        } else if (response.status === 400) {
-          alert("닉네임이 제대로 전송되지 않았습니다.");
-        } else {
-          alert("오류가 발생했습니다. 다시 시도해주세요.");
+        if (!res.ok) {
+          const msg = await res.text();
+          warningMsg.textContent = msg.includes("이미 등록된 닉네임") ? msg : "오류가 발생했습니다. 다시 시도해주세요.";
+          warningMsg.style.display = "block";
+          return;
         }
-      } catch (error) {
-        alert("서버와 연결할 수 없습니다.");
-        console.error(error);
-      }
-    });
-
-    // 사전예약자 목록 불러오기
-    async function loadNicknames() {
-      try {
-        const res = await fetch("/api/list");
-        if (res.ok) {
-          const list = await res.json();
-          const ul = document.getElementById("nicknameList");
-          ul.innerHTML = "";
-          list.forEach(nick => {
-            const li = document.createElement("li");
-            li.textContent = nick;
-            ul.appendChild(li);
-          });
-        } else {
-          document.getElementById("nicknameList").innerHTML = "<li>목록을 불러올 수 없습니다.</li>";
-        }
-      } catch (e) {
-        document.getElementById("nicknameList").innerHTML = "<li>목록을 불러올 수 없습니다.</li>";
+        nicknameInput.value = "";
+        await fetchList();
+        alert("사전예약이 완료되었습니다!");
+      } finally {
+        isLoading = false;
       }
     }
-    loadNicknames();
+
+    // 페이지 진입시 목록 불러오기
+    fetchList();
   </script>
 </body>
 </html>
