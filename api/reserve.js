@@ -18,24 +18,26 @@ module.exports = async (req, res) => {
     if (!nickname) return res.status(400).send("닉네임 필요");
 
     // 닉네임 중복 체크
-    const { data: existing } = await supabase
+    const { data: existing, error: selectError } = await supabase
       .from("reservations")
       .select("id")
       .eq("nickname", nickname);
 
+    if (selectError) throw selectError;
     if (existing && existing.length > 0) {
       return res.status(409).send("이미 등록된 닉네임입니다.");
     }
 
     // 닉네임 저장
-    const { error } = await supabase
+    const { error: insertError } = await supabase
       .from("reservations")
       .insert({ nickname });
 
-    if (error) throw error;
+    if (insertError) throw insertError;
 
     res.status(200).send("성공");
   } catch (err) {
-    res.status(400).send("잘못된 요청입니다.");
+    console.error("API 500 error:", err); // 이 라인 추가
+    res.status(500).send("서버 오류: " + (err.message || err));
   }
 };
