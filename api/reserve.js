@@ -1,41 +1,41 @@
-export const config = {
-  api: {
-    bodyParser: false,
-  },
-};
+const { createClient } = require("@supabase/supabase-js");
 
-const fs = require("fs");
-const path = require("path");
-const FILE_PATH = path.resolve(__dirname, "../reservations.json");
+const supabaseUrl = process.env.SUPABASE_URL;
+const supabaseKey = process.env.SUPABASE_KEY;
+const supabase = createClient(supabaseUrl, supabaseKey);
 
-module.exports = (req, res) => {
+module.exports = async (req, res) => {
   if (req.method !== "POST") return res.status(405).send("Method Not Allowed");
+
   let body = "";
-  req.on("data", (chunk) => { body += chunk; });
-  req.on("end", () => {
-    try {
-      // body 값이 실제로 잘 들어오는지 로그 찍기
-      console.log("body:", body);
-      if (!body) return res.status(400).send("빈 요청 본문");
-      const parsed = JSON.parse(body);
-      const nickname = parsed.nickname;
-      if (!nickname) return res.status(400).send("닉네임 필요");
-
-      let list = [];
-      if (fs.existsSync(FILE_PATH)) {
-        list = JSON.parse(fs.readFileSync(FILE_PATH, "utf-8"));
-      }
-
-      if (list.includes(nickname)) {
-        return res.status(409).send("이미 등록된 닉네임입니다.");
-      }
-
-      list.push(nickname);
-      fs.writeFileSync(FILE_PATH, JSON.stringify(list, null, 2));
-      res.status(200).send("성공");
-    } catch (err) {
-      console.error("파싱 오류:", err);
-      res.status(400).send("잘못된 요청입니다.");
-    }
+  await new Promise((resolve) => {
+    req.on("data", (chunk) => { body += chunk; });
+    req.on("end", resolve);
   });
+
+  try {
+    const { nickname } = JSON.parse(body);
+    if (!nickname) return res.status(400).send("닉네임 필요");
+
+    // 닉네임 중복 체크
+    const { data: existing } = await supabase
+      .from("reservations")
+      .select("id")
+      .eq("nickname", nickname);
+
+    if (existing && existing.length > 0) {
+      return res.status(409).send("이미 등록된 닉네임입니다.");
+    }
+
+    // 닉네임 저장
+    const { error } = await supabase
+      .from("reservations")
+      .insert({ nickname });
+
+    if (error) throw error;
+
+    res.status(200).send("성공");
+  } catch (err) {
+    res.status(400).send("잘못된 요청입니다.");
+  }
 };
