@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>와일드 캠프 - 사전예약</title>
+  <style>
+    body { font-family: Arial, sans-serif; text-align: center; margin-top: 50px; }
+    input, button { padding: 10px; font-size: 16px; margin: 10px; }
+    ul { list-style: none; padding: 0; }
+    #nicknameList { margin-top: 20px; }
+  </style>
+</head>
+<body>
+  <h1>🎮 와일드 캠프 사전예약 🎮</h1>
+  <p>닉네임을 입력하고 단 한 번의 사전예약 기회를 잡으세요!</p>
+
+  <div id="reserveForm">
+    <input type="text" id="nickname" placeholder="닉네임 입력" required />
+    <button type="submit" id="reserveBtn">사전예약</button>
+  </div>
+
+  <h2>📜 사전예약자 목록</h2>
+  <ul id="nicknameList"></ul>
+
+  <script>
+    const reserved = localStorage.getItem("wildcamp_reserved");
+    if (reserved) {
+      document.getElementById("reserveForm").innerHTML =
+        "<p>✅ 이미 사전예약을 완료하셨습니다.</p>";
+    }
+
+    document.getElementById("reserveBtn")?.addEventListener("click", async (e) => {
+      e.preventDefault();
+      const nickname = document.getElementById("nickname").value.trim();
+      if (!nickname) {
+        alert("닉네임을 입력해주세요.");
+        return;
+      }
+      try {
+        const response = await fetch("/api/reserve", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ nickname })
+        });
+
+        if (response.ok) {
+          localStorage.setItem("wildcamp_reserved", "true");
+          document.getElementById("reserveForm").innerHTML =
+            "<p>🎉 사전예약이 완료되었습니다!</p>";
+          loadNicknames();
+        } else if (response.status === 409) {
+          alert("이미 등록된 닉네임입니다.");
+        } else {
+          alert("오류가 발생했습니다. 다시 시도해주세요.");
+        }
+      } catch (error) {
+        alert("서버와 연결할 수 없습니다.");
+        console.error(error);
+      }
+    });
+
+    async function loadNicknames() {
+      const res = await fetch("/api/list");
+      const list = await res.json();
+      const ul = document.getElementById("nicknameList");
+      ul.innerHTML = "";
+      list.forEach(nick => {
+        const li = document.createElement("li");
+        li.textContent = nick;
+        ul.appendChild(li);
+      });
+    }
+    loadNicknames();
+  </script>
+</body>
+</html>
