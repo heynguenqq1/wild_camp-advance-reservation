@@ -67,8 +67,12 @@
       cursor: pointer;
       transition: background 0.15s;
     }
-    #reserveBtn:hover {
+    #reserveBtn:hover:not(:disabled) {
       background: #583bd5;
+    }
+    #reserveBtn:disabled {
+      background: #ccc;
+      cursor: default;
     }
     /* 입력 검증 시 나오는 경고 */
     .warning {
@@ -106,6 +110,13 @@
       text-align: left;
       padding-left: 4px;
     }
+    .done-message {
+      text-align: center;
+      font-size: 1rem;
+      font-weight: bold;
+      color: #5577dd;
+      margin: 16px 0;
+    }
   </style>
 </head>
 <body>
@@ -117,17 +128,22 @@
 
     <!-- 항상 보이는 붉은 경고 -->
     <div class="static-warning">
-      카카오톡 닉네임 혹은 현실 이름을 작성해주세요
+      학번과 이름을 작성해주세요.
     </div>
 
-    <div class="form-row">
-      <input id="nicknameInput" type="text" placeholder="카카오톡 닉네임/이름" maxlength="20" />
-      <button id="reserveBtn" onclick="onReserve()">사전예약</button>
+    <!-- form or done message -->
+    <div id="formContainer">
+      <div class="form-row">
+        <input id="nicknameInput" type="text" placeholder="학번과 이름을 작성해주세요." maxlength="20" />
+        <button id="reserveBtn" onclick="onReserve()">사전예약</button>
+      </div>
+      <!-- 입력 검증 시 나오는 경고 -->
+      <div id="warningMsg" class="warning">
+        학번과 이름을 작성해주세요.
+      </div>
     </div>
-
-    <!-- 입력 검증 시 나오는 경고 -->
-    <div id="warningMsg" class="warning">
-      카카오톡 닉네임 혹은 실제 이름을 작성해주세요
+    <div id="doneMsg" class="done-message" style="display:none;">
+      ✅ 이미 사전예약을 완료하셨습니다.
     </div>
 
     <div class="section-title">📜 사전예약자 목록</div>
@@ -138,9 +154,18 @@
 
   <script>
     const nicknameInput = document.getElementById("nicknameInput");
-    const warningMsg     = document.getElementById("warningMsg");
-    const listBox        = document.getElementById("listBox");
+    const reserveBtn    = document.getElementById("reserveBtn");
+    const warningMsg    = document.getElementById("warningMsg");
+    const listBox       = document.getElementById("listBox");
+    const formContainer = document.getElementById("formContainer");
+    const doneMsg       = document.getElementById("doneMsg");
     let isLoading = false;
+
+    // 이미 예약했으면 폼 대신 메시지
+    if (localStorage.getItem("wildcamp_reserved")) {
+      formContainer.style.display = "none";
+      doneMsg.style.display = "block";
+    }
 
     // 예약 목록 불러오기
     async function fetchList() {
@@ -184,12 +209,16 @@
         });
         if (!res.ok) {
           const msg = await res.text();
-          warningMsg.textContent = msg.includes("이미 등록된 닉네임") 
-            ? msg 
+          warningMsg.textContent = msg.includes("이미 등록된 닉네임")
+            ? msg
             : "오류가 발생했습니다. 다시 시도해주세요.";
           warningMsg.style.display = "block";
           return;
         }
+        // 성공 시 한 번만 작성 가능
+        localStorage.setItem("wildcamp_reserved", "true");
+        formContainer.style.display = "none";
+        doneMsg.style.display = "block";
         nicknameInput.value = "";
         await fetchList();
         alert("🎉 사전예약 완료 🎉");
