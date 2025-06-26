@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>와일드 캠프 – 공식 홈페이지</title>
+  <style>
+    /* Base (mobile-first) */
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Noto Sans KR', sans-serif; color: #333; line-height: 1.5; }
+    a { color: inherit; text-decoration: none; }
+    img { max-width: 100%; display: block; }
+
+    header {
+      background: #7757fa;
+      color: #fff;
+      padding: 16px;
+      position: sticky;
+      top: 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    header .logo { font-size: 1.2rem; font-weight: bold; }
+    header .nav-toggle {
+      font-size: 1.5rem;
+      background: none;
+      border: none;
+      color: #fff;
+      cursor: pointer;
+    }
+    nav {
+      display: none;
+      flex-direction: column;
+      background: #7757fa;
+    }
+    nav a {
+      padding: 12px 16px;
+      border-top: 1px solid rgba(255,255,255,0.2);
+    }
+
+    .hero {
+      padding: 40px 16px;
+      text-align: center;
+      background: url('/hero.jpg') center center/cover no-repeat;
+      color: #fff;
+    }
+    .hero h1 { font-size: 1.8rem; margin-bottom: 8px; }
+    .hero p { font-size: 1rem; margin-bottom: 16px; }
+    .hero .btn {
+      display: inline-block;
+      background: #fff;
+      color: #7757fa;
+      padding: 10px 20px;
+      border-radius: 24px;
+      font-weight: bold;
+    }
+
+    .features {
+      padding: 32px 16px;
+      background: #f9f9fa;
+    }
+    .features h2 { font-size: 1.4rem; text-align: center; margin-bottom: 24px; }
+    .feature-list { display: grid; grid-template-columns: 1fr; gap: 16px; }
+    .feature-item {
+      background: #fff;
+      border-radius: 12px;
+      padding: 16px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+      text-align: center;
+    }
+    .feature-item h3 { font-size: 1.1rem; margin-bottom: 8px; }
+    .feature-item p { font-size: 0.95rem; color: #555; }
+
+    .cta {
+      padding: 32px 16px;
+      text-align: center;
+      background: #7757fa;
+      color: #fff;
+    }
+    .cta h2 { font-size: 1.4rem; margin-bottom: 12px; }
+    .cta .btn {
+      background: #fff;
+      color: #7757fa;
+      padding: 12px 24px;
+      border-radius: 24px;
+      font-weight: bold;
+    }
+
+    footer {
+      padding: 16px;
+      text-align: center;
+      font-size: 0.85rem;
+      color: #777;
+      background: #fff;
+      border-top: 1px solid #eee;
+    }
+
+    /* Tablet & up */
+    @media (min-width: 600px) {
+      .features .feature-list { grid-template-columns: repeat(2, 1fr); }
+    }
+    /* Desktop & up */
+    @media (min-width: 900px) {
+      header { padding: 16px 32px; }
+      .hero { padding: 80px 32px; }
+      .hero h1 { font-size: 2.4rem; }
+      .features { padding: 64px 32px; }
+      .cta { padding: 64px 32px; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="logo">와일드 캠프</div>
+    <button class="nav-toggle" onclick="toggleNav()">☰</button>
+    <nav id="mainNav">
+      <a href="#home">홈</a>
+      <a href="#features">특징</a>
+      <a href="#reserve">사전예약</a>
+      <a href="#contact">문의</a>
+    </nav>
+  </header>
+
+  <section class="hero" id="home">
+    <h1>와일드 캠프에 오신 것을 환영합니다</h1>
+    <p>모험과 휴식을 한 번에, 지금 바로 체험하세요!</p>
+    <a href="#reserve" class="btn">사전예약 하기</a>
+  </section>
+
+  <section class="features" id="features">
+    <h2>주요 특징</h2>
+    <div class="feature-list">
+      <div class="feature-item">
+        <h3>실시간 모험</h3>
+        <p>다양한 야외 활동을 실시간으로 즐길 수 있어요.</p>
+      </div>
+      <div class="feature-item">
+        <h3>안전 보장</h3>
+        <p>전문 가이드와 함께하는 안전한 캠핑을 제공합니다.</p>
+      </div>
+      <div class="feature-item">
+        <h3>편리한 예약</h3>
+        <p>모바일에서 간편하게 사전예약을 할 수 있습니다.</p>
+      </div>
+      <div class="feature-item">
+        <h3>친환경</h3>
+        <p>자연을 생각하는 친환경 캠프 운영을 지향합니다.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="cta" id="reserve">
+    <h2>지금 사전예약하고 특별 혜택을 받아보세요!</h2>
+    <a href="/public/index.html" class="btn">사전예약 페이지</a>
+  </section>
+
+  <footer id="contact">
+    <p>© 2025 와일드 캠프. All Rights Reserved.</p>
+    <p>문의: contact@wildcamp.com</p>
+  </footer>
+
+  <script>
+    function toggleNav() {
+      const nav = document.getElementById('mainNav');
+      nav.style.display = nav.style.display === 'flex' ? 'none' : 'flex';
+    }
+  </script>
+</body>
+</html>
