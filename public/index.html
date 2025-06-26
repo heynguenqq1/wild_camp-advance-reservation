@@ -16,7 +16,7 @@
   <meta name="twitter:title"       content="와일드 캠프 사전예약" />
   <meta name="twitter:description" content="카카오톡 닉네임 또는 실제 이름을 입력하고 단 한 번의 기회를 잡으세요!" />
   <meta name="twitter:image"       content="https://wild-camp-advance-reservation.vercel.app/preview.png" />
-  
+
   <style>
     body {
       font-family: 'Noto Sans KR', sans-serif;
@@ -47,15 +47,37 @@
       color: #444;
       font-size: 1.08rem;
       text-align: center;
-      margin-bottom: 24px;
+      margin-bottom: 16px;
+    }
+    /* 홈페이지 이동 버튼 */
+    .homeBtn {
+      display: block;
+      text-align: center;
+      background: #7757fa;
+      color: #fff;
+      font-weight: bold;
+      text-decoration: none;
+      border-radius: 8px;
+      padding: 12px 0;
+      margin: 0 auto 24px;
+      width: 200px;
+      transition: background 0.15s;
+    }
+    .homeBtn:hover {
+      background: #583bd5;
     }
     /* 항상 보이는 붉은 경고 문구 */
-    .static-warning {
+    .static-warning p {
       color: #e53935;
       font-weight: bold;
       font-size: 1rem;
-      margin-bottom: 16px;
-      text-align: center;
+      margin: 0;
+      line-height: 1.4;
+    }
+    .static-warning .indent {
+      display: block;
+      margin-left: 1.5em;
+      margin-top: 4px;
     }
     .form-row {
       display: flex;
@@ -88,7 +110,6 @@
       background: #ccc;
       cursor: default;
     }
-    /* 입력 검증 시 나오는 경고 */
     .warning {
       color: #e53935;
       font-weight: bold;
@@ -140,8 +161,11 @@
       닉네임을 입력하고 <b>단 한 번</b>의 사전예약 기회를 잡으세요!
     </div>
 
+    <!-- 홈페이지로 이동하기 버튼 -->
+    <a href="homepage.html" class="homeBtn">홈페이지로 이동하기</a>
+
     <!-- 항상 보이는 붉은 경고 -->
-   <div class="static-warning">
+    <div class="static-warning">
       <p>학번과 이름을 작성해주세요.</p>
       <p class="indent">학번과 이름을 쓰지 않을 경우, 사전예약은 무효 처리 됩니다.</p>
     </div>
